@@ -9,7 +9,7 @@ LEAF(msyscall)
 	sw a1,4(sp)
 	sw a2,8(sp)
 	sw a3,12(sp)
-	move v0,a0  
+	mv v0,a0  
 	syscall
 	nop
 	jr ra
