@@ -64,7 +64,7 @@ OF SUCH DAMAGE.
 LEAF(__reset_vector)
     la a2,__cpu_init
     jr a2
-    mtc0    $0, C0_COUNT        # Clear cp0 Count (Used to measure boot time.)
+    mtc0    x0, C0_COUNT        # Clear cp0 Count (Used to measure boot time.)
     nop
 
 END(__reset_vector)
@@ -121,7 +121,7 @@ init_resources:                 # initializes resources for "cpu".
     la      ra, all_done        # If main returns then go to all_done:.
     mv      a0, zero            # Indicate that there are no arguments available.
     la      v0, _start          # load the address of the CRT entry point _start.
-    mtc0    v0, $30             ？# Write ErrorEPC with the address of main
+    mtc0    v0, x30             ？# Write ErrorEPC with the address of main
     ehb                         ？# clear hazards (makes sure write to ErrorPC has completed)
 
     # Return from exception will now execute code in main
@@ -176,7 +176,7 @@ END(__cpu_init)
 # code below. This is the code that covers the debug exception which you normally will not get.
 
 .org 0x480 /* EJTAG debug exception (EJTAG Control Register[ProbTrap] == 0.) */
-    li      r24_malta_word, LEDS_ADDR     # If post boot then $24 is clobbered.
+    li      r24_malta_word, LEDS_ADDR     # If post boot then x24 is clobbered.
     mtc0    a0, C0_DESAVE       ？# DeSave a0
     mfc0    a0, C0_DEPC         ？# Read DEPC
     sw      a0, 0(r24_malta_word)    # Display lower 16 bits of DEPC if there is not an EJTAG probe.

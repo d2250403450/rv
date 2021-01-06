@@ -61,55 +61,55 @@ LEAF(init_gpr)
     // (xor rN, rN, rN for example.)
 
 	// Initialize register sets
-    li      $1, 0xdeadbeef      // (0xdeadbeef stands out, kseg2 mapped, odd.)
+    li      x1, 0xdeadbeef      // (0xdeadbeef stands out, kseg2 mapped, odd.)
 
 	// Determine how many shadow sets are implemented (in addition to the base register set.)
-	// the first time thru the loop it will initialize using $1 set above.
-	// At the bottom og the loop, 1 is  subtract from $30
+	// the first time thru the loop it will initialize using x1 set above.
+	// At the bottom og the loop, 1 is  subtract from x30
 	// and loop back to next_shadow_set to start the next loop and the next lowest set number.
-	mfc0	$29, C0_SRSCTL		// read C0_SRSCtl
-	ext	    $30, $29, 26, 4		// extract HSS
+	mfc0	x29, C0_SRSCTL		// read C0_SRSCtl
+	ext	    x30, x29, 26, 4		// extract HSS
 
 next_shadow_set:
 	// set PSS to shadow set to be initialized
-	ins	$29, $30, 6, 4		// insert PSS
-	mtc0	$29, C0_SRSCTL		// write C0_SRSCtl
+	ins	x29, x30, 6, 4		// insert PSS
+	mtc0	x29, C0_SRSCTL		// write C0_SRSCtl
 
-	mv	$1, $1
-	mv	$2, $1
-	mv	$3, $1
-	mv	$4, $1
-	mv	$5, $1
-	mv	$6, $1
-	mv	$7, $1
-	mv	$8, $1
-	mv	$9, $1
-	mv	$10, $1
-	mv	$11, $1
-	mv	$12, $1
-	mv	$13, $1
-	mv	$14, $1
-	mv	$15, $1
-	mv	$16, $1
-	mv	$17, $1
-	mv	$18, $1
-	mv	$19, $1
-	mv	$20, $1
-	mv	$21, $1
-	mv	$22, $1
-	mv	$23, $1
-	mv	$24, $1
-	mv	$25, $1
-	mv	$26, $1
-	mv	$27, $1
-	mv	$28, $1
-	mv	$29, $1
-	beqz    $30, done_init_gpr // early exit when we get to set 0 so we don't clobber return in $31
+	mv	x1, x1
+	mv	x2, x1
+	mv	x3, x1
+	mv	x4, x1
+	mv	x5, x1
+	mv	x6, x1
+	mv	x7, x1
+	mv	x8, x1
+	mv	x9, x1
+	mv	x10, x1
+	mv	x11, x1
+	mv	x12, x1
+	mv	x13, x1
+	mv	x14, x1
+	mv	x15, x1
+	mv	x16, x1
+	mv	x17, x1
+	mv	x18, x1
+	mv	x19, x1
+	mv	x20, x1
+	mv	x21, x1
+	mv	x22, x1
+	mv	x23, x1
+	mv	x24, x1
+	mv	x25, x1
+	mv	x26, x1
+	mv	x27, x1
+	mv	x28, x1
+	mv	x29, x1
+	beqz    x30, done_init_gpr // early exit when we get to set 0 so we don't clobber return in x31
 	nop
-	mv	$30, $1
-	mv	$31, $1
+	mv	x30, x1
+	mv	x31, x1
 	j	next_shadow_set
-	add	$30, $30, -1  // Since the code started with the highest set number this decrements to the next lower number
+	add	x30, x30, -1  // Since the code started with the highest set number this decrements to the next lower number
 
 
 done_init_gpr:

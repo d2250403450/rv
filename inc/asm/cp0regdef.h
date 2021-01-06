@@ -7,34 +7,34 @@
 #ifndef _cp0regdef_h_
 #define _cp0regdef_h_
 
-#define CP0_INDEX $0
-#define CP0_RANDOM $1
-#define CP0_ENTRYLO0 $2
-#define CP0_ENTRYLO1 $3
-#define CP0_CONTEXT $4
-#define CP0_PAGEMASK $5
-#define CP0_WIRED $6
-#define CP0_BADVADDR $8
-#define CP0_COUNT $9
-#define CP0_ENTRYHI $10
-#define CP0_COMPARE $11
-#define CP0_STATUS $12
-#define CP0_CAUSE $13
-#define CP0_EPC $14
-#define CP0_PRID $15
-#define CP0_CONFIG $16
-#define CP0_LLADDR $17
-#define CP0_WATCHLO $18
-#define CP0_WATCHHI $19
-#define CP0_XCONTEXT $20
-#define CP0_FRAMEMASK $21
-#define CP0_DIAGNOSTIC $22
-#define CP0_PERFORMANCE $25
-#define CP0_ECC $26
-#define CP0_CACHEERR $27
-#define CP0_TAGLO $28
-#define CP0_TAGHI $29
-#define CP0_ERROREPC $30
+#define CP0_INDEX       x0
+#define CP0_RANDOM      x1
+#define CP0_ENTRYLO0    x2
+#define CP0_ENTRYLO1    x3
+#define CP0_CONTEXT     x4
+#define CP0_PAGEMASK    x5
+#define CP0_WIRED       x6
+#define CP0_BADVADDR    x8
+#define CP0_COUNT       x9
+#define CP0_ENTRYHI     x10
+#define CP0_COMPARE     x11
+#define CP0_STATUS      x12
+#define CP0_CAUSE       x13
+#define CP0_EPC         x14
+#define CP0_PRID        x15
+#define CP0_CONFIG      x16
+#define CP0_LLADDR      x17
+#define CP0_WATCHLO     x18
+#define CP0_WATCHHI     x19
+#define CP0_XCONTEXT    x20
+#define CP0_FRAMEMASK   x21
+#define CP0_DIAGNOSTIC  x22
+#define CP0_PERFORMANCE x25
+#define CP0_ECC         x26
+#define CP0_CACHEERR    x27
+#define CP0_TAGLO       x28
+#define CP0_TAGHI       x29
+#define CP0_ERROREPC    x30
 
 
 #define STATUSF_IP4 0x100

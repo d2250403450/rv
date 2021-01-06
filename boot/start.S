@@ -147,9 +147,9 @@ LEAF(_start)
 	
 	// Clear boot interrupt vector bit in Coprocessor 0 Status register
 	// macro: mips32_bicsr (SR_BEV);
-	mfc0	v0,$12
+	mfc0	v0,x12
 	ins		v0,zero,0x16,0x1
-	mtc0	v0,$12
+	mtc0	v0,x12
 	ehb
 
 	/* jump to main */
