@@ -26,7 +26,7 @@
 # 	jr 		v0
 # 	#jal	\handler
 # 	nop
-# 	j	ret_from_exception
+# 	j		ret_from_exception
 # 	nop
 # 	END(handle_\exception)
 # .endm
@@ -73,7 +73,7 @@ page_fault:  				#page fault occur
 							#下面的是瞎写的，回头改！！！
 	mfc0	k0, CP0_BADVADDR
 	mv		a0, k0
-	addi 	a0, 0x1000
+	addi 	a0, a0, 0x1000
 	lw		a1, mCONTEXT
 	nop
 	sw 		ra, tlbra
@@ -83,18 +83,18 @@ page_fault:  				#page fault occur
 							#over
 b1:
 	mv	 	k1, v0		#v0 is pa
-	srl		k1, 12
-	sll 	k1, 6
-	or		k1, 0x6
+	srli	k1, k1, 12
+	slli 	k1, k1, 6
+	or		k1, k1, 0x6
 
 	mfc0	k0, CP0_BADVADDR
-	and 	k0, 0x1000			#####可能这里有问题
+	and 	k0, k0, 0x1000			#####可能这里有问题
 	nop
 	bnez	k0, SET_ENTRYLO1
 	nop
 SET_ENTRYLO0:
 	mtc0 	k1, CP0_ENTRYLO0
-	addi	k1, -0x1000
+	addi	k1, k1, -0x1000
 	mtc0    k1, CP0_ENTRYLO1
 	nop		
 	j 		tlb_refill_done
@@ -128,7 +128,7 @@ NESTED(handle_mod, TF_SIZE, sp)
 	nop
 	cli
 	.set at
-	move	a0, sp
+	mv		a0, sp
 	la 		v0, page_fault_handler
 	jr 		v0
 	nop
@@ -140,11 +140,11 @@ NESTED(handle_reserved, TF_SIZE, sp)
 	nop
 	cli
 	.set at
-	move	a0, sp
+	mv		a0, sp
 	la 		v0, do_reserved
 	jr 		v0
 	nop
-	j	ret_from_exception
+	j		ret_from_exception
 	nop
 END(handle_reserved)
 
@@ -187,7 +187,7 @@ CLI
 mfc0	t0, CP0_CAUSE
 mfc0	t2, CP0_STATUS
 
-and	t0, t2
+and		t0, t0, t2
 
 andi	t1, t0, STATUSF_IP0
 
@@ -215,9 +215,9 @@ button_deal:
 
 timer_irq:
 	nop
-	jal clear_timer0_int
+	j	clear_timer0_int
 	nop
-	jal	sched_yield
+	j	sched_yield
 	nop
 	
 	# mfc0	t0, CP0_CAUSE

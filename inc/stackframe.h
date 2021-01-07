@@ -5,8 +5,8 @@
 
 .macro STI
 	mfc0	t0,	CP0_STATUS
-	li	t1, (STATUS_CU0 | 0x1)
-	or	t0, t1
+	li		t1, (STATUS_CU0 | 0x1)
+	or		t0, t0, t1
 	mtc0	t0, CP0_STATUS
 	
 .endm
@@ -14,17 +14,17 @@
 
 .macro CLI
 	mfc0	t0, CP0_STATUS
-	li	t1, (STATUS_CU0 | 0x1)
-	or	t0, t1
-	xor	t0, 0x1
+	li		t1, (STATUS_CU0 | 0x1)
+	or		t0, t0, t1
+	xori	t0, t0, 0x1
 	mtc0	t0, CP0_STATUS
 .endm
 
 .macro SAVE_ALL    
                                   
 		mfc0	k0,CP0_STATUS                   
-		sll		k0,3      /* extract cu0 bit */  
-		bltz	k0,1f                            
+		slli	k0, k0, 3      /* extract cu0 bit */  
+		bltz	k0, 1f                            
 		nop       
 		/*                                       
 		 * Called from user mode, new stack      
@@ -33,26 +33,26 @@
 		//lw	k1,%lo(kernelsp)(k1)  //not clear right now 
 		           
 1:				
-		move	k0,sp 
+		mv		k0,sp 
 		get_sp      
-		move	k1,sp                     
-		subu	sp,k1,TF_SIZE                    
-		sw	k0,TF_REG29(sp)                  
-		sw	x2,TF_REG2(sp)                   
+		mv		k1,sp                     
+		sub		sp,k1,TF_SIZE                    
+		sw		k0,TF_REG29(sp)                  
+		sw		x2,TF_REG2(sp)                   
 		mfc0	v0,CP0_STATUS                    
-		sw	v0,TF_STATUS(sp)                 
+		sw		v0,TF_STATUS(sp)                 
 		mfc0	v0,CP0_CAUSE                     
-		sw	v0,TF_CAUSE(sp)                  
+		sw		v0,TF_CAUSE(sp)                  
 		mfc0	v0,CP0_EPC                       
-		sw	v0,TF_EPC(sp)
+		sw		v0,TF_EPC(sp)
 		mfc0	v0, CP0_BADVADDR        
-		sw	v0, TF_BADVADDR(sp)            
+		sw		v0, TF_BADVADDR(sp)            
 		mfhi	v0                               
-		sw	v0,TF_HI(sp)                     
+		sw		v0,TF_HI(sp)                     
 		mflo	v0                               
-		sw	v0,TF_LO(sp)                     
-		sw	x0,TF_REG0(sp)
-		sw	x1,TF_REG1(sp)                    
+		sw		v0,TF_LO(sp)                     
+		sw		x0,TF_REG0(sp)
+		sw		x1,TF_REG1(sp)                    
 		//sw	x2,TF_REG2(sp)                   
 		sw	x3,TF_REG3(sp)                   
 		sw	x4,TF_REG4(sp)                   
@@ -90,20 +90,20 @@
 .macro RESTORE_SOME                                      
 		// .set	mips1                            
 		mfc0	t0,CP0_STATUS                    
-		ori	t0,0x3                          
-		xori	t0,0x3                          
+		ori		t0, t0, 0x3                          
+		xori	t0, t0, 0x3                          
 		mtc0	t0,CP0_STATUS                    
-		lw	v0,TF_STATUS(sp)             
-		li	v1, 0xff00 				 
-		and	t0, v1 					 
-		nor	v1, x0, v1 				 
-		and	v0, v1 					 
-		or	v0, t0 					 
+		lw		v0,TF_STATUS(sp)             
+		li		v1, 0xff00 				 
+		and		t0, t0, v1 					 
+		nor		v1, x0, v1 				 
+		and		v0, v0, v1 					 
+		or		v0, v0, t0 					 
 		mtc0	v0,CP0_STATUS 		 
-		lw	v1,TF_LO(sp)                                       
+		lw		v1,TF_LO(sp)                                       
 		mtlo	v1                               
-		lw	v0,TF_HI(sp)                     
-		lw	v1,TF_EPC(sp)                    
+		lw		v0,TF_HI(sp)                     
+		lw		v1,TF_EPC(sp)                    
 		mthi	v0                               
 		mtc0	v1,CP0_EPC                       
 		lw	x31,TF_REG31(sp)                 
@@ -147,23 +147,23 @@
 		lw	k0,TF_EPC(sp) 				 
 		lw	sp,TF_REG29(sp)  /* Deallocate stack */  
 		jr	k0 								 
-		rfe 								 
+		rfe		//从异常返回时恢复寄存器的内容							 
 .endm
 
 
 .macro get_sp
 	mfc0	k1, CP0_CAUSE
-	andi	k1, 0x47C			/*relate interrupt point on CPU*/
-	xori	k1, 0x400			/*relate interrupt point on CPU*/
+	andi	k1, k1, 0x47C			/*relate interrupt point on CPU*/
+	xori	k1, k1, 0x400			/*relate interrupt point on CPU*/
 	bnez	k1, 1f
 	nop
-	li	sp, 0x82000000
-	j	2f
+	li		sp, 0x82000000
+	j		2f
 	nop
 1:
 	bltz	sp, 2f
 	nop
-	lw	sp, KERNEL_SP
+	lw		sp, KERNEL_SP
 	nop
 
 2:	nop
@@ -184,26 +184,26 @@
 		//lw	k1,%lo(kernelsp)(k1)  //not clear right now 
 		           
 1:				
-		move	k0,sp 
+		mv		k0,sp 
 		li 		sp, 0x82000000      
-		move	k1,sp                     
-		subu	sp,k1,TF_SIZE                    
-		sw	k0,TF_REG29(sp)                  
-		sw	x2,TF_REG2(sp)                   
+		mv		k1,sp                     
+		sub		sp,k1,TF_SIZE                    
+		sw		k0,TF_REG29(sp)                  
+		sw		x2,TF_REG2(sp)                   
 		mfc0	v0,CP0_STATUS                    
-		sw	v0,TF_STATUS(sp)                 
+		sw		v0,TF_STATUS(sp)                 
 		mfc0	v0,CP0_CAUSE                     
-		sw	v0,TF_CAUSE(sp)                  
+		sw		v0,TF_CAUSE(sp)                  
 		mfc0	v0,CP0_EPC                       
-		sw	v0,TF_EPC(sp)
+		sw		v0,TF_EPC(sp)
 		mfc0	v0, CP0_BADVADDR        
-		sw	v0, TF_BADVADDR(sp)            
+		sw		v0, TF_BADVADDR(sp)            
 		mfhi	v0                               
-		sw	v0,TF_HI(sp)                     
+		sw		v0,TF_HI(sp)                     
 		mflo	v0                               
-		sw	v0,TF_LO(sp)                     
-		sw	x0,TF_REG0(sp)
-		sw	x1,TF_REG1(sp)                    
+		sw		v0,TF_LO(sp)                     
+		sw		x0,TF_REG0(sp)
+		sw		x1,TF_REG1(sp)                    
 		//sw	x2,TF_REG2(sp)                   
 		sw	x3,TF_REG3(sp)                   
 		sw	x4,TF_REG4(sp)                   
@@ -233,5 +233,5 @@
 		sw	x28,TF_REG28(sp)                 
 		sw	x30,TF_REG30(sp)                 
 		sw	x31,TF_REG31(sp)
-		move	k0, sp			/*may be cause problem*/
+		mv	k0, sp			/*may be cause problem*/
 .endm
