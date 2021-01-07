@@ -14,25 +14,25 @@ KERNEL_SP:
 	
 LEAF(env_pop_tf)
 	.set noreorder
-	addiu	sp,sp,-32
+	addi	sp,sp,-32
 	sw  	ra,28(sp)
 	mv		k0, a0			# k0 = &curenv->env_tf
-	mtc0	a1, C0_ENTRYHI	？# C0_ENTRYHI = ASID
+	mtc0	a1, C0_ENTRYHI	# C0_ENTRYHI = ASID，将a1寄存器中的值赋给TLB表项的高阶寄存器
 
-	mfc0	t0,C0_STATUS	？
+	mfc0	t0,C0_STATUS	# 将处理器状态和控制寄存器的值赋给t0寄存器
 	ori		t0,t0,0x3
 	xori	t0,t0,0x3
-	mtc0	t0,C0_STATUS	？
+	mtc0	t0,C0_STATUS	# 将t0寄存器中的内容传输给处理器状态和控制寄存器
 
 
 	lw 		k1, TF_CAUSE(k0)
-	mtc0	k1, C0_CAUSE	？
+	mtc0	k1, C0_CAUSE	# 将k1寄存器中的内容赋值给处理器状态与控制寄存器
 	lw		v1,	TF_LO(k0)
 	lw		v0,	TF_HI(k0)
-	mtlo	v1				？
+	mtlo	v1				# 将v1寄存器中的内容赋值到lo寄存器（保存乘法除法结果的寄存器，用于恢复现场）
 	lw		v1,	TF_EPC(k0)
-	mthi	v0				？
-	mtc0	v1,	C0_EPC		？
+	mthi	v0				# 将v1寄存器中的内容赋值到hi寄存器（保存乘法除法结果的寄存器，用于恢复现场）
+	mtc0	v1,	C0_EPC		# 将v1寄存器中的内容赋值到EPC寄存器（包含处理异常之后恢复处理的地址）
 	lw		x31,TF_REG31(k0)
 	lw		x30,TF_REG30(k0)
 	#lw		x29,TF_REG29(k0)															
@@ -66,7 +66,7 @@ LEAF(env_pop_tf)
 	lw		k0,TF_STATUS(k0)
 	#li		k0, 0x10000400		# xt1 = 
 	li		k0, 0x10007c01		#!!!!!一会改
-	mtc0	k0,C0_STATUS	？
+	mtc0	k0,C0_STATUS	#将k0寄存器中的值赋给处理器状态和控制寄存器
 	
 	#jr      k1
 	jr	 	k1
@@ -104,15 +104,15 @@ LEAF(env_push_tf)
 	# subi	k1, k1, 16		 
 	# sw 		k1, TF_PC(a0)
 	mv 	k0, a0
-	mfc0 	k1, C0_STATUS		？
+	mfc0 	k1, C0_STATUS		# 将处理器状态和控制寄存器的值赋给k1寄存器
 	sw 		k1, TF_STATUS(k0)
-	mfc0    k1, C0_CAUSE		？
+	mfc0    k1, C0_CAUSE		# 将异常原因寄存器中的值赋给k1寄存器
 	sw		k1, TF_CAUSE(k0)
-	mfc0	k1, C0_ENTRYHI		？
+	mfc0	k1, C0_ENTRYHI		# 将TLB页表高阶寄存器赋给k1寄存器
 	sw  	k1, TF_HI(k0)
-	mfc0	k1, C0_ENTRYLO0		？
+	mfc0	k1, C0_ENTRYLO0		# 将奇数编号的虚拟页的TLB条目的低阶寄存器的值赋给k1寄存器
 	sw		k1, TF_LO(k0)
-	mfc0    k1, C0_EPC
+	mfc0    k1, C0_EPC			# 将EPC寄存器中的内容赋给k1寄存器（包含处理异常之后恢复处理的地址）
 	sw 		k1, TF_EPC(k0)
 	sw		x31,TF_REG31(k0)
 	sw		x30,TF_REG30(k0)

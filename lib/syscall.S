@@ -18,22 +18,22 @@ NESTED(handle_sys,TF_SIZE, sp)
 
     //refer to ./user/syscall_wrap.S , what is the value of v0 ? v0 is syscall number
     lw v0, TF_REG2(sp)
-    subu    v0, v0, __SYSCALL_BASE
+    sub     v0, v0, __SYSCALL_BASE
     sltiu   t0, v0, __NR_SYSCALLS+1
 
     //set epc as epc plus 4
     //Where is the next being exectued cpu instruction when return from exception?
     lw      t1,TF_EPC(sp)
-    addiu   t1, 4
+    addi   t1, 4
     sw	    t1, TF_EPC(sp)
 
     //if legal , goto the right function s address
     //Why sll?
     beqz	t0, illegal_syscall
     nop
-    sll	    t0, v0,2
+    slli	t0, v0,2
     la	    t1, sys_call_table
-    addu	t1, t0
+    add     t1, t0
     lw	    t2, (t1)
     beqz	t2, illegal_syscall
     nop
@@ -47,7 +47,7 @@ NESTED(handle_sys,TF_SIZE, sp)
     lw	t6, 16(t0)
     lw	t7, 20(t0)
 
-    subu	sp, 20
+    sub	sp, 20
 
     //push the parameters into stack
     //think about syscall_wrap.S , can we remove some lines?
@@ -59,11 +59,11 @@ NESTED(handle_sys,TF_SIZE, sp)
     sw	t7, 20(sp)
 
     //go to exectue the syscall
-    jalr	t2      #t2 is syscall function's address
+    jr	t2      #t2 is syscall function's address
     nop
 
     //syscall finished , restore sp and v0
-    addu	sp, 20
+    add	sp, 20
     sw	v0, TF_REG2(sp)
 
     //return to user mode

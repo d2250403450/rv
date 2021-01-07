@@ -61,10 +61,16 @@ OF SUCH DAMAGE.
     R E S E T   E X C E P T I O N   H A N D L E R
 **************************************************************************************/
 
+/*
+* mfc0 rt, rd 将CP0中的rd寄存器内容传输到rt通用寄存器；
+* mtc0 rt, rd 将rt通用寄存器中内容传输到CP0中寄存器rd；
+*/
+
+
 LEAF(__reset_vector)
     la a2,__cpu_init
     jr a2
-    mtc0    x0, C0_COUNT        # Clear cp0 Count (Used to measure boot time.)
+    mtc0    x0, C0_COUNT        ？# 将x0的值赋值给处理器周期计数器
     nop
 
 END(__reset_vector)
@@ -75,11 +81,11 @@ LEAF(__cpu_init)
     # a debugger breakpoint using a sdbp instruction.
     # 验证代码是由于重置而不是NMI。如果这是一个NMI，那么使用sdbp指令触发一个调试器断点。
 
-    mfc0    s1, C0_STATUS       ？# Read CP0 Status
-    ext     s1, s1, 19, 1       ？# extract NMI
+    mfc0    s1, C0_STATUS       ？# Read CP0 Status 将处理器状态和控制寄存器的内容赋值给s1
+    ext     s1, s1, 19, 1       ？# extract NMI 位提取：将s1寄存器的第19位（1位）提取出来放到s1寄存器
     beqz    s1, init_resources  # Branch if this is NOT an NMI exception.
     nop
-    sdbbp                       ？# Failed assertion: NMI.
+    sdbbp                       ？# Failed assertion: NMI.产生EJTAG异常的断点
 
 init_resources:                 # initializes resources for "cpu".
 
@@ -92,7 +98,7 @@ init_resources:                 # initializes resources for "cpu".
     # Initialize the TLB
 
     la      a2, init_tlb        # Generate unique EntryHi contents per entry pair.
-    jr    a2
+    jr      a2
     nop
 
     #Initialize the Instruction cache
@@ -106,7 +112,7 @@ init_resources:                 # initializes resources for "cpu".
 
     la          a2, change_k0_cca
     li          a1, 0xf
-    ins         a2, a1, 29, 1   ？# changed to KSEG1 address by setting bit 29
+    ins         a2, a1, 29, 1   ？#清除a2寄存器第29位（一位），并将a1寄存器中的低1位，放到a2中第29位开始的地方，合并起来
     jr          a2
     nop
     
@@ -121,12 +127,17 @@ init_resources:                 # initializes resources for "cpu".
     la      ra, all_done        # If main returns then go to all_done:.
     mv      a0, zero            # Indicate that there are no arguments available.
     la      v0, _start          # load the address of the CRT entry point _start.
-    mtc0    v0, x30             ？# Write ErrorEPC with the address of main
+    mtc0    v0, x30             ？# Write ErrorEPC with the address of main，将v0寄存器中的内容传输到x30寄存器中
     ehb                         ？# clear hazards (makes sure write to ErrorPC has completed)
+                                /*在异常处理代码中（这里由于改变了状态寄存器情况类似），由于流水线的作用，异常处理结束时，
+                                其下一条（可能超过一条，依赖流水线的设计）仍然被预取执行，这样由于CPU的特权级别发生了改变，
+                                但被流水线预取的指令并不知道这些，因而导致严重的安全性问题。为了避免这种情况发生，
+                                MIPS专门使用了ehb指令。*/
+
 
     # Return from exception will now execute code in main
 
-    eret                        ？# Exit reset exception handler and start execution of _start.
+    eret                        ？# 退出异常处理程序并开始运行 _start.
     
 
 /**************************************************************************************/
@@ -148,17 +159,17 @@ END(__cpu_init)
 /* vectors will be addressed properly. All .org assume this! */
 /* TLB refill, 32 bit task. */
 .org 0x200                      # TLB refill, 32 bit task.
-    sdbbp                       ？# This has the effect of starting the debugger
+    sdbbp                       ？# This has the effect of starting the debugger，产生EJTAG异常的断点
     nop
 
 .org 0x280                      # XTLB refill, 64 bit task. start + 0x280
-    sdbbp                       ？# This has the effect of starting the debugger
+    sdbbp                       ？# This has the effect of starting the debugger，产生EJTAG异常的断点
     nop
 
 #include "init_cp0.S"
 
 .org 0x300                      # Cache error exception. start + 0x300
-    sdbbp                       ？# This has the effect of starting the debugger
+    sdbbp                       ？# This has the effect of starting the debugger，产生EJTAG异常的断点
     nop
 
 #include "init_tlb.S"
@@ -169,7 +180,7 @@ END(__cpu_init)
     li      k0, LEDS_ADDR       # Board LEDs display
     li      k1, 0x5555          # alternating one-zeros
     sw      k1, 0(k0)           # Write pattern to LEDs
-    eret                        ？
+    eret                        ？#退出异常处理程序并开始运行 _start.
     nop
 
 # If you want the above code to fit into 1k flash you will need to leave out the
@@ -177,10 +188,10 @@ END(__cpu_init)
 
 .org 0x480 /* EJTAG debug exception (EJTAG Control Register[ProbTrap] == 0.) */
     li      r24_malta_word, LEDS_ADDR     # If post boot then x24 is clobbered.
-    mtc0    a0, C0_DESAVE       ？# DeSave a0
+    mtc0    a0, C0_DESAVE       ？# DeSave a0，将a0寄存器中的内容赋值到EJTAG调试异常保存寄存器
     mfc0    a0, C0_DEPC         ？# Read DEPC
     sw      a0, 0(r24_malta_word)    # Display lower 16 bits of DEPC if there is not an EJTAG probe.
-    mfc0    a0, C0_DESAVE       ？# Restore a0
+    mfc0    a0, C0_DESAVE       ？# Restore a0，将EJTAG调试异常保存寄存器的内容传输到a0寄存器。
 1:  j       1b  /* Stay here */
     nop
 

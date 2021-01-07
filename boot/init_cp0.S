@@ -53,50 +53,60 @@ OF SUCH DAMAGE.
 	.set	noat                // Don't allow the assembler to use r1(at) for synthetic instr.
 /**************************************************************************************
 **************************************************************************************/
+
+
+
+/*
+* mfc0 rt, rd 将CP0中的rd寄存器内容传输到rt通用寄存器；
+* mtc0 rt, rd 将rt通用寄存器中内容传输到CP0中寄存器rd；
+*/
+
+
 LEAF(init_cp0)
 
     // Initialize Status
-	li	v1, 0x00400404		// (M_StatusERL | M_StatusIPL1 | M_StatusBEV)
-	mtc0	v1, C0_STATUS		// write C0_Status
+	li		v1, 0x00400404		// (M_StatusERL | M_StatusIPL1 | M_StatusBEV)
+	mtc0	v1, C0_STATUS		// write C0_Status,将v1寄存器中的内容传输到处理器状态与控制寄存器
 
 	// Initialize Watch registers if implemented.
 	mfc0	v0, C0_CONFIG1		// read C0_Config1
-	ext	v1, v0, 3, 1		// extract bit 3 WR (Watch registers implemented)
+	ext		v1, v0, 3, 1		// extract bit 3 WR (Watch registers implemented)
+								/*将v0寄存器的第3位提取出来放到v1寄存器*/
 	beq 	v1, zero, done_wr
 	li    	v1, 0x7				// (M_WatchHiI | M_WatchHiR | M_WatchHiW)
 
 	// Clear all possible Watch Status bits and disable watch exceptions
-	mtc0	v1, C0_WATCHHI		// write C0_WatchHi0
-	mtc0	zero, C0_WATCHLO	// write C0_WatchLo0
+	mtc0	v1, C0_WATCHHI		// write C0_WatchHi0，将v1寄存器中的内容传输到0号watchpoint控制寄存器
+	mtc0	zero, C0_WATCHLO	// write C0_WatchLo0，将0号寄存器赋给0号watchpoint地址寄存器
 
-	mtc0	v1, C0_WATCHHI, 1	// write C0_WatchHi1
-	mtc0	zero, C0_WATCHLO, 1	// write C0_WatchLo1
+	mtc0	v1, C0_WATCHHI, 1	// write C0_WatchHi1，将v1寄存器中的内容传输到1号watchpoint控制寄存器
+	mtc0	zero, C0_WATCHLO, 1	// write C0_WatchLo1，将0号寄存器赋给1号watchpoint地址寄存器
 
-	mtc0	v1, C0_WATCHHI, 2	// write C0_WatchHi2
-	mtc0	zero, C0_WATCHLO, 2	// write C0_WatchLo2
+	mtc0	v1, C0_WATCHHI, 2	// write C0_WatchHi2，将v1寄存器中的内容传输到2号watchpoint控制寄存器
+	mtc0	zero, C0_WATCHLO, 2	// write C0_WatchLo2，将0号寄存器赋给2号watchpoint地址寄存器
 
-	mtc0	v1, C0_WATCHHI, 3	// write C0_WatchHi3
-	mtc0	zero, C0_WATCHLO, 3	// write C0_WatchLo3
+	mtc0	v1, C0_WATCHHI, 3	// write C0_WatchHi3，将v1寄存器中的内容传输到3号watchpoint控制寄存器
+	mtc0	zero, C0_WATCHLO, 3	// write C0_WatchLo3，将0号寄存器赋给3号watchpoint地址寄存器
 
-	mtc0	v1, C0_WATCHHI, 4	// write C0_WatchHi4
-	mtc0	zero, C0_WATCHLO, 4	// write C0_WatchLo4
+	mtc0	v1, C0_WATCHHI, 4	// write C0_WatchHi4，将v1寄存器中的内容传输到4号watchpoint控制寄存器
+	mtc0	zero, C0_WATCHLO, 4	// write C0_WatchLo4，将0号寄存器赋给4号watchpoint地址寄存器
 
-	mtc0	v1, C0_WATCHHI, 5	// write C0_WatchHi5
-	mtc0	zero, C0_WATCHLO, 5	// write C0_WatchLo5
+	mtc0	v1, C0_WATCHHI, 5	// write C0_WatchHi5，将v1寄存器中的内容传输到5号watchpoint控制寄存器
+	mtc0	zero, C0_WATCHLO, 5	// write C0_WatchLo5，将0号寄存器赋给5号watchpoint地址寄存器
 
-	mtc0	v1, C0_WATCHHI, 6	// write C0_WatchHi6
-	mtc0	zero, C0_WATCHLO, 6	// write C0_WatchLo6
+	mtc0	v1, C0_WATCHHI, 6	// write C0_WatchHi6，将v1寄存器中的内容传输到6号watchpoint控制寄存器
+	mtc0	zero, C0_WATCHLO, 6	// write C0_WatchLo6，将0号寄存器赋给6号watchpoint地址寄存器
 
-	mtc0	v1, C0_WATCHHI, 7	// write C0_WatchHi7
-	mtc0	zero, C0_WATCHLO, 7	// write C0_WatchLo7
+	mtc0	v1, C0_WATCHHI, 7	// write C0_WatchHi7，将v1寄存器中的内容传输到7号watchpoint控制寄存器
+	mtc0	zero, C0_WATCHLO, 7	// write C0_WatchLo7，将0号寄存器赋给7号watchpoint地址寄存器
 
 done_wr:
 
 	// Clear WP bit to avoid watch exception upon user code entry, IV, and software interrupts.
 	mtc0	zero, C0_CAUSE		// write C0_Cause: Init AFTER init of CP0 WatchHi/Lo registers.
-
+								// 将0号寄存器的值赋给异常原因寄存器（CAUSE）
 	// Clear timer interrupt. (Count was cleared at the reset vector to allow timing boot.)
-	mtc0	zero, C0_COMPARE	// write C0_Compare
+	mtc0	zero, C0_COMPARE	// write C0_Compare，将0号寄存器的值赋给比较寄存器（和计数寄存器配合实现定时中断的）
 
         jr      ra
 	nop

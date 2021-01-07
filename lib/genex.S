@@ -48,10 +48,10 @@ NESTED(handle_tlb, TF_SIZE, sp)
 	# Set EntryLo, need to search page table
 	# search page table, if the item is invalible then pageout
 	mfc0	k0, CP0_BADVADDR
-	move	a1, k0
+	mv		a1, k0
 	lw		a0, mCONTEXT
 	sw 		ra, tlbra
-	jal 	va2pa
+	j	 	va2pa
 	nop
 	lw 		ra, tlbra
 	li		t0, 0xffffffff
@@ -63,26 +63,26 @@ NESTED(handle_tlb, TF_SIZE, sp)
 	
 page_fault:  				#page fault occur
 	mfc0	k0, CP0_BADVADDR
-	move	a0, k0
+	mv		a0, k0
 	lw		a1, mCONTEXT
 	nop
 	sw 		ra, tlbra
-	jal 	pageout
+	j	 	pageout
 	nop
 	lw 		ra, tlbra
 							#下面的是瞎写的，回头改！！！
 	mfc0	k0, CP0_BADVADDR
-	move	a0, k0
+	mv		a0, k0
 	addi 	a0, 0x1000
 	lw		a1, mCONTEXT
 	nop
 	sw 		ra, tlbra
-	jal 	pageout
+	j	 	pageout
 	nop
 	lw 		ra, tlbra
 							#over
 b1:
-	move 	k1, v0		#v0 is pa
+	mv	 	k1, v0		#v0 is pa
 	srl		k1, 12
 	sll 	k1, 6
 	or		k1, 0x6
@@ -132,7 +132,7 @@ NESTED(handle_mod, TF_SIZE, sp)
 	la 		v0, page_fault_handler
 	jr 		v0
 	nop
-	j	ret_from_exception
+	j		ret_from_exception
 	nop
 END(handle_mod)
 
@@ -159,7 +159,7 @@ FEXPORT(ret_from_exception)
 	nop
 	mfc0 k1, CP0_STATUS
 	li   a0, 0x10000000
-	or  k1, a0
+	or   k1, a0
 	mtc0 k1, CP0_STATUS
 	mtc0 k0, CP0_EPC      # TODO fix
 	li   k0, 0x00000000
@@ -245,39 +245,39 @@ NESTED(do_refill,0 , sp)
 1:			//j 1b
 			nop
 			lw		k1,mCONTEXT
-			and		k1,0xfffff000
-			mfc0		k0,CP0_BADVADDR
-			srl		k0,20
-			and		k0,0xfffffffc
-			addu		k0,k1
+			and		k1, k1, 0xfffff000
+			mfc0	k0,CP0_BADVADDR
+			srl		k0, k0, 20
+			and		k0, k0, 0xfffffffc
+			add		k0, k0, k1
 			
 			lw		k1,0(k0)
 			nop
-			move		t0,k1
-			and		t0,0x0200
-			beqz		t0,NOPAGE
+			mv		t0,k1
+			and		t0, t0, 0x0200
+			beqz	t0,NOPAGE
 			nop
-			and		k1,0xfffff000
-			mfc0		k0,CP0_BADVADDR
-			srl		k0,10
-			and		k0,0xfffffffc
-			and		k0,0x00000fff
-			addu		k0,k1
+			and		k1, k1, 0xfffff000
+			mfc0	k0,CP0_BADVADDR
+			srl		k0, k0, 10
+			and		k0, k0, 0xfffffffc
+			and		k0, k0, 0x00000fff
+			add		k0, k0, k1
 
-			or		k0,0x80000000
+			or		k0, k0, 0x80000000
 			lw		k1,0(k0)
 			nop
-			move		t0,k1
-			and		t0,0x0200
-			beqz		t0,NOPAGE
+			mv		t0,k1
+			and		t0, t0, 0x0200
+			beqz	t0,NOPAGE
 			nop
-			move		k0,k1
-			and		k0,0x1
-			beqz		k0,NoCOW
+			mv		k0,k1
+			and		k0, k0, 0x1
+			beqz	k0,NoCOW
 			nop
-			and		k1,0xfffffbff
+			and		k1, k1, 0xfffffbff
 NoCOW:
-			or		k1,0x0000003e  #set ENTRYLO C=111, D=1, V=1, G=0 
+			or		k1, k1, 0x0000003e  #set ENTRYLO C=111, D=1, V=1, G=0 
 			mtc0	k1,CP0_ENTRYLO0
 			nop
 			tlbwr
@@ -287,19 +287,19 @@ NoCOW:
 NOPAGE:
 //3: j 3b
 nop
-			mfc0		a0,CP0_BADVADDR
-			lw		a1,mCONTEXT
+			mfc0	a0, CP0_BADVADDR
+			lw		a1, mCONTEXT
 			nop
 				
-			sw	 	ra,tlbra
-			jal 	pageout
+			sw	 	ra, tlbra
+			j	 	pageout
 			nop
 //3: j 3b
 nop			
-			lw		ra,tlbra
+			lw		ra, tlbra
 			nop
 
-			j	1b
+			j		1b
 2:			nop
 
 			jr		ra

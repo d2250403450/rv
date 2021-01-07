@@ -53,6 +53,13 @@ OF SUCH DAMAGE.
 	.set	noat                // Don't allow the assembler to use r1(at) for synthetic instr.
 /**************************************************************************************
 **************************************************************************************/
+
+/*
+* mfc0 rt, rd 将CP0中的rd寄存器内容传输到rt通用寄存器；
+* mtc0 rt, rd 将rt通用寄存器中内容传输到CP0中寄存器rd；
+*/
+
+
 LEAF(init_gpr)
 
 	// Initialize the general purpose registers and any shadow register sets.
@@ -67,13 +74,15 @@ LEAF(init_gpr)
 	// the first time thru the loop it will initialize using x1 set above.
 	// At the bottom og the loop, 1 is  subtract from x30
 	// and loop back to next_shadow_set to start the next loop and the next lowest set number.
-	mfc0	x29, C0_SRSCTL		// read C0_SRSCtl
-	ext	    x30, x29, 26, 4		// extract HSS
+
+	mfc0	x29, C0_SRSCTL		// read C0_SRSCtl，将影子寄存器设置状态和控制寄存器的值赋给x29通用寄存器
+								//C0_SRSCTL寄存器控制通用寄存器影子集的操作
+	ext	    x30, x29, 26, 4		// extract HSS，提取x29寄存器的第26-29位提取出来放入x30寄存器中
 
 next_shadow_set:
 	// set PSS to shadow set to be initialized
-	ins	x29, x30, 6, 4		// insert PSS
-	mtc0	x29, C0_SRSCTL		// write C0_SRSCtl
+	ins	x29, x30, 6, 4		// insert PSS，清掉x29寄存器中的6-9位，然后将x30号寄存器中的低4位，放置到x29寄存器中的6-9位，合并起来
+	mtc0	x29, C0_SRSCTL		// write C0_SRSCtl，把x29通用寄存器中的内容传输给影子寄存器设置状态和控制寄存器中
 
 	mv	x1, x1
 	mv	x2, x1

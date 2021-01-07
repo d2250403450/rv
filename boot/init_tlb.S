@@ -53,21 +53,27 @@ OF SUCH DAMAGE.
 	.set	noat                // Don't allow the assembler to use r1(at) for synthetic instr.
 /**************************************************************************************
 **************************************************************************************/
+
+/*
+* mfc0 rt, rd 将CP0中的rd寄存器内容传输到rt通用寄存器；
+* mtc0 rt, rd 将rt通用寄存器中内容传输到CP0中寄存器rd；
+*/
+
 LEAF(init_tlb)
 
 check_for_tlb:
 	// Determine if we have a TLB
-	mfc0    v1, C0_CONFIG			// read C0_Config
-	ext	    v1, v1, 7, 3			// extract MT field
+	mfc0    v1, C0_CONFIG			// read C0_Config，将配置寄存器中的内容传输到v1寄存器中
+	ext	    v1, v1, 7, 3			// extract MT field，提取v1寄存器中第7-9位提取出来，存放到v1寄存器
 	li	    a3, 0x1					// load a 1 to check against
 	bne	    v1, a3, done_init_tlb
-	mfc0    v0, C0_CONFIG1			// C0_Config1
+	mfc0    v0, C0_CONFIG1			// C0_Config1，将1号配置寄存器（影子）的内容传输到v0寄存器中
 	nop
 
 start_init_tlb:
 	// Config1MMUSize == Number of TLB entries - 1
-	ext     v1, v0, CFG1_MMUSSHIFT, 6 // extract MMU Size
-	mtc0    zero, C0_ENTRYLO0		// write C0_EntryLo0
+	ext     v1, v0, CFG1_MMUSSHIFT, 6 // extract MMU Size，将v0寄存器中的第25-30位提取出来放到v1寄存器中
+	mtc0    zero, C0_ENTRYLO0		// write C0_EntryLo0，
 	mtc0    zero, C0_ENTRYLO1		// write C0_EntryLo1
 	mtc0    zero, C0_PAGEMASK		// write C0_PageMask
 	mtc0    zero, C0_WIRED			// write C0_Wired

@@ -70,15 +70,15 @@ LEAF(init_icache)
 	nop
 
 	li	    a2, 2
-	sllv    v1, a2, v1			// Now have true I$ line size in bytes
+	sll     v1, a2, v1			// Now have true I$ line size in bytes
 
 	ext	    a0, v0, CFG1_ISSHIFT, 3		// extract IS
 	li	    a2, 64
-	sllv    a0, a2, a0			// I$ Sets per way
+	sll     a0, a2, a0			// I$ Sets per way
 
 	// Config1IA == I$ Assoc - 1
 	ext	    a1, v0, CFG1_IASHIFT, 3		// extract IA
-	add	    a1, 1
+	addi	a1, a1, 1
 
 	mul	    a0, a0, a1			// Total number of sets
 
@@ -88,15 +88,15 @@ LEAF(init_icache)
 	mtc0    zero, C0_TAGLO		// write C0_ITagLo
 	mtc0    zero, C0_TAGHI		// write C0_ITagHi
 
-	move    a3, a0
+	mv    	a3, a0
 
 next_icache_tag:
 	// Index Store Tag Cache Op
 	// Will invalidate the tag entry, clear the lock bit, and clear the LRF bit
 	cache   0x8, 0(a2)			// ICIndexStTag
-	add	    a3, -1				// Decrement set counter
+	addi	a3, a3, -1				// Decrement set counter
 	bne     a3, zero, next_icache_tag
-	add     a2, v1				// Get next line address
+	add     a2, a2, v1				// Get next line address
 
 done_icache:
 
@@ -120,15 +120,15 @@ LEAF(init_dcache)
 	nop
 
 	li	    a2, 2
-	sllv	v1, a2, v1			// Now have true D$ line size in bytes
+	sll		v1, a2, v1			// Now have true D$ line size in bytes
 
 	ext	    a0, v0, CFG1_DSSHIFT, 3		// extract DS
 	li	    a2, 64
-	sllv	a0, a2, a0	// D$ Sets per way
+	sll		a0, a2, a0	// D$ Sets per way
 
 	// Config1DA == D$ Assoc - 1
 	ext	    a1, v0, CFG1_DASHIFT, 3		// extract DA
-	add	    a1, 1
+	addi	a1, a1, 1
 
 	mul	    a0, a0, a1			// Get total number of sets
 
@@ -140,17 +140,17 @@ LEAF(init_dcache)
 	mtc0	zero, C0_TAGLO, 2	// write C0_DTagLo
 	mtc0	zero, C0_TAGHI, 2	// write C0_DTagHi
 
-	move	a3, a0
+	mv	a3, a0
 
 next_dcache_tag:
 	// Index Store Tag Cache Op
 	// Will invalidate the tag entry, clear the lock bit, and clear the LRF bit
 
     cache	0x9, 0(a2)			// DCIndexStTag
-	add	    a3, -1			    // Decrement set counter
+	addi	a3, a3, -1			    // Decrement set counter
 
 	bne	    a3, zero, next_dcache_tag
-	add	    a2, v1		    	// Get next line address
+	add	    a2, a2, v1		    	// Get next line address
 
 done_dcache:
     jr      ra
@@ -161,10 +161,10 @@ LEAF(change_k0_cca)
 	// NOTE! This code must be executed in KSEG1 (not KSGE0 uncached)
     // Set CCA for kseg0 to cacheable
 	mfc0	v0, C0_CONFIG	// read C0_Config
-	li	v1, 3			// CCA for single-core processors
-      ins	v0, v1, 0, 3	// insert K0
+	li		v1, 3			// CCA for single-core processors
+    ins		v0, v1, 0, 3	// insert K0
 	mtc0	v0, C0_CONFIG	// write C0_Config
 	jr.hb   ra
-    	nop
+    nop
 
 END(change_k0_cca)
