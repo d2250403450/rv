@@ -60,10 +60,10 @@ LEAF(init_icache)
 	// Can be skipped if using magic simulation cache flush
 
 	// Determine how big the I$ is
-	mfc0	v0, C0_CONFIG1		// read C0_Config1
+	mfc0	v0, C0_CONFIG1		// read C0_Config1，将1号配置寄存器中的内容传输到v0通用寄存器中
 
 	// Isolate I$ Line Size
-	ext	    v1, v0, CFG1_ILSHIFT, 3		// extract IL
+	ext	    v1, v0, CFG1_ILSHIFT, 3		// extract IL，将v0寄存器中CFG1_ILSHIFT（19）位开始的三位（19-21位）提取出来放到v1寄存器中
 
 	// Skip ahead if No I$
 	beq	    v1, zero, done_icache
@@ -72,12 +72,12 @@ LEAF(init_icache)
 	li	    a2, 2
 	sll     v1, a2, v1			// Now have true I$ line size in bytes
 
-	ext	    a0, v0, CFG1_ISSHIFT, 3		// extract IS
+	ext	    a0, v0, CFG1_ISSHIFT, 3		// extract IS，将v0寄存器中CFG1_ISSHIFT（22）开始的3位（22-24位）提取出来放到a0寄存器中
 	li	    a2, 64
 	sll     a0, a2, a0			// I$ Sets per way
 
 	// Config1IA == I$ Assoc - 1
-	ext	    a1, v0, CFG1_IASHIFT, 3		// extract IA
+	ext	    a1, v0, CFG1_IASHIFT, 3		// extract IA，将v0寄存器中的CFG1_IASHIFT（16）开始的3位（16-18位）提取出来放到a1寄存器中
 	addi	a1, a1, 1
 
 	mul	    a0, a0, a1			// Total number of sets
@@ -85,8 +85,8 @@ LEAF(init_icache)
 	lui	    a2, 0x8000			// Get a KSeg0 address for cacheops
 
 	// Clear TagLo/TagHi registers
-	mtc0    zero, C0_TAGLO		// write C0_ITagLo
-	mtc0    zero, C0_TAGHI		// write C0_ITagHi
+	mtc0    zero, C0_TAGLO		// write C0_ITagLo，将0号通用寄存器中的内容赋给cache标签接口的低阶部分
+	mtc0    zero, C0_TAGHI		// write C0_ITagHi，将0号通用寄存器中的内容赋给cache标签接口的高阶部分
 
 	mv    	a3, a0
 

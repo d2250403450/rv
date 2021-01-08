@@ -24,16 +24,16 @@ NESTED(handle_sys,TF_SIZE, sp)
     //set epc as epc plus 4
     //Where is the next being exectued cpu instruction when return from exception?
     lw      t1,TF_EPC(sp)
-    addi   t1, 4
+    addi    t1, t1, 4
     sw	    t1, TF_EPC(sp)
 
     //if legal , goto the right function s address
     //Why sll?
     beqz	t0, illegal_syscall
     nop
-    slli	t0, v0,2
+    slli	t0, v0, 2
     la	    t1, sys_call_table
-    add     t1, t0
+    add     t1, t1, t0
     lw	    t2, (t1)
     beqz	t2, illegal_syscall
     nop
@@ -47,7 +47,7 @@ NESTED(handle_sys,TF_SIZE, sp)
     lw	t6, 16(t0)
     lw	t7, 20(t0)
 
-    sub	sp, 20
+    addi    sp, sp, -20
 
     //push the parameters into stack
     //think about syscall_wrap.S , can we remove some lines?
@@ -63,7 +63,7 @@ NESTED(handle_sys,TF_SIZE, sp)
     nop
 
     //syscall finished , restore sp and v0
-    add	sp, 20
+    addi	sp, sp, 20
     sw	v0, TF_REG2(sp)
 
     //return to user mode
