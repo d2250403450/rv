@@ -66,7 +66,7 @@ LEAF(env_pop_tf)
 	lw		k0,TF_STATUS(k0)
 	#li		k0, 0x10000400		# xt1 = 
 	li		k0, 0x10007c01		#!!!!!一会改
-	mtc0	k0,C0_STATUS	#将k0寄存器中的值赋给处理器状态和控制寄存器
+	mtc0	k0,C0_STATUS		#将k0寄存器中的值赋给处理器状态和控制寄存器
 	
 	#jr      k1
 	jr	 	k1
@@ -112,7 +112,7 @@ LEAF(env_push_tf)
 	sw  	k1, TF_HI(k0)
 	mfc0	k1, C0_ENTRYLO0		# 将奇数编号的虚拟页的TLB条目的低阶寄存器的值赋给k1寄存器
 	sw		k1, TF_LO(k0)
-	mfc0    k1, C0_EPC			# 将EPC寄存器中的内容赋给k1寄存器（包含处理异常之后恢复处理的地址）
+	mfc0    k1, C0_EPC			# 将EPC寄存器中的内容赋给k1寄存器（EPC:处理异常之后恢复处理的地址）
 	sw 		k1, TF_EPC(k0)
 	sw		x31,TF_REG31(k0)
 	sw		x30,TF_REG30(k0)

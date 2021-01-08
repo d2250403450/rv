@@ -41,7 +41,7 @@ NESTED(handle_tlb, TF_SIZE, sp)
 	# and 	k0, 0xfffff000
 	# mtc0 	k0, CP0_ENTRYHI
 	li 		k0, 0x00001800
-	mtc0	k0, CP0_PAGEMASK
+	mtc0	k0, CP0_PAGEMASK	//CP0_PAGEMASK:控制tlb项中可变页大小寄存器
 	mfc0	k0, CP0_ENTRYHI
 	or 		k0, 0x0 # 0x0 is must write by ASID in futher
 	mtc0	k0, CP0_ENTRYHI

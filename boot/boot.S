@@ -189,7 +189,7 @@ END(__cpu_init)
 .org 0x480 /* EJTAG debug exception (EJTAG Control Register[ProbTrap] == 0.) */
     li      r24_malta_word, LEDS_ADDR     # If post boot then x24 is clobbered.
     mtc0    a0, C0_DESAVE       ？# DeSave a0，将a0寄存器中的内容赋值到EJTAG调试异常保存寄存器
-    mfc0    a0, C0_DEPC         ？# Read DEPC
+    mfc0    a0, C0_DEPC         ？# Read DEPC,DEPC:EJTAG调试异常时最近的程序计数器值
     sw      a0, 0(r24_malta_word)    # Display lower 16 bits of DEPC if there is not an EJTAG probe.
     mfc0    a0, C0_DESAVE       ？# Restore a0，将EJTAG调试异常保存寄存器的内容传输到a0寄存器。
 1:  j       1b  /* Stay here */

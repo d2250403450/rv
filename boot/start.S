@@ -51,7 +51,7 @@ _mips_general_exception:
 # 	nop
 
 		sw		sp, exp_sp
-		mfc0	k1,CP0_CAUSE	//将异常原因寄存器的内容传输到k1通用寄存器中
+		mfc0	k1,CP0_CAUSE	？//将异常原因寄存器的内容传输到k1通用寄存器中
 		
 		la	k0, exception_handlers
 
@@ -108,11 +108,11 @@ LEAF(_start)
 
 	.set	reorder
 	/* Disable interrupts */
-	mtc0	zero, CP0_STATUS		//将0号寄存器的值赋给处理器状态和控制寄存器
+	mtc0	zero, CP0_STATUS		？//将0号寄存器的值赋给处理器状态和控制寄存器
 
         /* Disable watch exception. */
-        mtc0    zero, CP0_WATCHLO	//将0号寄存器的值赋给watchpoint地址寄存器
-        mtc0    zero, CP0_WATCHHI	//将0号寄存器的值赋给watchpoint控制寄存器
+        mtc0    zero, CP0_WATCHLO	？//将0号寄存器的值赋给watchpoint地址寄存器
+        mtc0    zero, CP0_WATCHHI	？//将0号寄存器的值赋给watchpoint控制寄存器
 
 	
 	/* Zero the BSS */
@@ -155,10 +155,10 @@ LEAF(_start)
 	
 	// Clear boot interrupt vector bit in Coprocessor 0 Status register
 	// macro: mips32_bicsr (SR_BEV);
-	mfc0	v0,x12				//将处理器状态与控制寄存器的内容传输到v0寄存器	
-	ins		v0,zero,0x16,0x1	//清除v0中第16位，然后将0好寄存器中的低1位，放置到v0中的第16位，合并起来
-	mtc0	v0,x12				//将v0寄存器中的内容传输到处理器状态与控制寄存器
-	ehb
+	mfc0	v0,x12				？//将处理器状态与控制寄存器的内容传输到v0寄存器	
+	ins		v0,zero,0x16,0x1	？//清除v0中第16位，然后将0好寄存器中的低1位，放置到v0中的第16位，合并起来
+	mtc0	v0,x12				？//将v0寄存器中的内容传输到处理器状态与控制寄存器
+	ehb							？//exception hazard barrier防止异常处理时流水线结构预取指令造成CPU特权级别改变
 
 	/* jump to main */
 	jal	ra main
